@@ -2,6 +2,7 @@
 import React, { useState, useEffect, ChangeEvent, useMemo } from 'react';
 import { Node, NodeDetails, FrameworkType, PaletteItem } from '../../types';
 import { PALETTE_ITEMS } from '../../constants';
+import { refineText } from '../../services/geminiService';
 import Button from '../Button';
 import Input from '../Input';
 import Select from '../Select';
@@ -163,28 +164,66 @@ const EditNodeModal: React.FC<EditNodeModalProps> = ({
       alert("Gemini APIキーが設定されていません。この機能は利用できません。");
       return;
     }
-    setIsRefiningField(fieldName);
-    // Simulate AI call for refinement
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const refinedText = `（AIによる推敲結果）${currentText} ... このように改善しました。`;
     
-    if (isExperienceNode && experienceDetails && currentNode) {
-      const framework = experienceDetails.activeFramework;
-      setCurrentNode({
-        ...currentNode,
-        details: {
-          ...currentNode.details,
-          experience: {
-            ...experienceDetails,
-            [framework]: {
-              ...experienceDetails[framework],
-              [fieldName]: refinedText,
+    if (!currentText.trim()) {
+      alert("推敲する文章が入力されていません。");
+      return;
+    }
+    
+    setIsRefiningField(fieldName);
+    
+    try {
+      // フィールド名を日本語に変換
+      const fieldLabels: Record<string, string> = {
+        situation: '状況',
+        task: '課題',
+        action: '行動',
+        result: '結果',
+        target: '目標',
+        issue: '課題',
+        learning: '学び',
+        description: '特性の説明'
+      };
+      
+      const fieldLabel = fieldLabels[fieldName] || fieldName;
+      const context = isExperienceNode && currentNode ? `経験「${currentNode.label}」の${fieldLabel}について` : '';
+      
+      const refinedText = await refineText(currentText, fieldLabel, context);
+      
+      if (isExperienceNode && experienceDetails && currentNode) {
+        const framework = experienceDetails.activeFramework;
+        setCurrentNode({
+          ...currentNode,
+          details: {
+            ...currentNode.details,
+            experience: {
+              ...experienceDetails,
+              [framework]: {
+                ...experienceDetails[framework],
+                [fieldName]: refinedText,
+              },
             },
           },
-        },
-      });
+        });
+      } else if (!isExperienceNode && currentNode && fieldName === 'description') {
+        // 特性ノードの場合
+        setCurrentNode({
+          ...currentNode,
+          details: {
+            ...currentNode.details,
+            trait: {
+              ...currentNode.details.trait!,
+              description: refinedText,
+            },
+          },
+        });
+      }
+    } catch (error: any) {
+      console.error("推敲エラー:", error);
+      alert(`推敲中にエラーが発生しました: ${error.message}`);
+    } finally {
+      setIsRefiningField(null);
     }
-    setIsRefiningField(null);
   };
 
 
@@ -381,15 +420,28 @@ const EditNodeModal: React.FC<EditNodeModalProps> = ({
               <label htmlFor="traitDescription" className="block text-sm font-medium text-gray-700 mb-1">
                 特性の説明
               </label>
-              <textarea
-                id="traitDescription"
-                name="description"
-                value={traitDetails.description}
-                onChange={handleInputChange}
-                rows={4}
-                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
-                placeholder="特性に関する詳細な説明やエピソードを入力..."
-              />
+              <div className="flex items-start space-x-2">
+                <textarea
+                  id="traitDescription"
+                  name="description"
+                  value={traitDetails.description}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className="flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  placeholder="特性に関する詳細な説明やエピソードを入力..."
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleRefineText('description', traitDetails.description)}
+                  isLoading={isRefiningField === 'description'}
+                  disabled={!apiKeyIsSet || !!isRefiningField}
+                  title={!apiKeyIsSet ? "Gemini APIキーが設定されていません。" : "AIと推敲"}
+                  className="text-blue-600 hover:bg-blue-50 h-full"
+                >
+                  <PencilSquareIcon className="w-4 h-4 mr-1"/> AIと推敲
+                </Button>
+              </div>
             </div>
           )}
         </div>

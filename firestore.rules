@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // usersコレクション全体に対するルール（既存）
+    match /users/{userId}/{document=**} {
+      // 認証済みユーザーであり、かつリクエストユーザーのIDとドキュメントのuserIdが一致する場合のみ許可
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // プロファイルデータへのアクセス
+    match /profiles/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 自己分析マップへのアクセス
+    match /selfAnalysisMaps/{mapId} {
+      allow read, write: if request.auth != null &&
+        (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // チャットセッションへのアクセス
+    match /chatSessions/{sessionId} {
+      allow read, write: if request.auth != null &&
+        (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // 企業分析データへのアクセス
+    match /companyAnalysis/{analysisId} {
+      allow read, write: if request.auth != null &&
+        (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // 業界分析データへのアクセス
+    match /industryAnalysis/{analysisId} {
+      allow read, write: if request.auth != null &&
+        (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid;
+    }
+  }
+}

@@ -32,13 +32,6 @@ export interface ChatSession {
   type: 'self' | 'company' | 'industry' | 'general';
 }
 
-export interface TimelineStep {
-  id: string; // Can be predefined ID from constants or Firestore generated ID
-  title: string;
-  description: string;
-  status: 'pending' | 'in-progress' | 'completed';
-  dueDate?: Date | FirebaseTimestamp; // Can be Date or Firebase Timestamp
-}
 
 // For Gemini API responses, particularly for grounding
 export interface GroundingChunkWeb {
@@ -109,9 +102,15 @@ export interface Connection {
   toConnector: 'top' | 'bottom' | 'left' | 'right';
 }
 
-export interface AiGlobalAnalysis {
-  selfPR: string;
-  gakuchika: string;
+export interface SelfAnalysisResult {
+  strengths: string[];
+  weaknesses: string[];
+  values: string[];
+  personalityTraits: string[];
+  skills: string[];
+  experiences: string[];
+  growthAreas: string[];
+  careerGoals: string[];
 }
 
 export interface ConnectorPoint {
@@ -119,4 +118,15 @@ export interface ConnectorPoint {
   side: 'top' | 'bottom' | 'left' | 'right';
   x: number;
   y: number;
+}
+
+export interface SelfAnalysisMap {
+  id: string;
+  title: string;
+  nodes: Record<string, Node>;
+  connections: Connection[];
+  analysisResult?: SelfAnalysisResult;
+  createdAt: Date | FirebaseTimestamp;
+  updatedAt: Date | FirebaseTimestamp;
+  userId: string;
 }

@@ -1,5 +1,5 @@
 
-import { TimelineStep, PaletteItem, NodeDetails } from './types';
+import { PaletteItem, NodeDetails } from './types';
 import {
   AcademicCapIcon,
   UsersIcon,
@@ -27,18 +27,6 @@ export const DEFAULT_INDUSTRIES: string[] = [
   "運輸・物流", "エネルギー", "教育", "医療・福祉", "官公庁・団体", "その他"
 ];
 
-export const INITIAL_TIMELINE_STEPS: TimelineStep[] = [
-  { id: '1', title: "自己分析", description: "強み・弱み、価値観を明確にする", status: 'pending' },
-  { id: '2', title: "業界研究", description: "興味のある業界の動向を調査する", status: 'pending' },
-  { id: '3', title: "企業研究", description: "志望企業の事業内容・文化を理解する", status: 'pending' },
-  { id: '4', title: "ES作成", description: "エントリーシートを作成・添削する", status: 'pending' },
-  { id: '5', title: "筆記試験対策", description: "SPIや玉手箱などの対策を行う", status: 'pending' },
-  { id: '6', title: "面接対策", description: "模擬面接などで実践練習を積む", status: 'pending' },
-  { id: '7', title: "OB/OG訪問", description: "実際に働く社員から話を聞く", status: 'pending' },
-  { id: '8', title: "インターンシップ参加", description: "企業での就業体験を通じて理解を深める", status: 'pending' },
-  { id: '9', title: "本選考応募", description: "企業へ正式に応募する", status: 'pending' },
-  { id: '10', title: "内定承諾", description: "内定を得て、承諾手続きを行う", status: 'pending' },
-];
 
 export const GEMINI_TEXT_MODEL = "gemini-2.5-flash-preview-04-17";
 export const GEMINI_IMAGE_MODEL = "imagen-3.0-generate-002"; // Though not used in this app currently

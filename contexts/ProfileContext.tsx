@@ -1,8 +1,7 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { UserProfile, TimelineStep } from '../types';
+import { UserProfile } from '../types';
 import { useAuth } from './AuthContext';
-import { db, doc, getDoc, setDoc, serverTimestamp, collection, writeBatch } from '../firebase';
-import { INITIAL_TIMELINE_STEPS } from '../constants';
+import { db, doc, getDoc, setDoc, serverTimestamp } from '../firebase';
 
 interface ProfileContextType {
   profile: UserProfile | null;
@@ -61,35 +60,16 @@ export const ProfileProvider: React.FC<{ children: ReactNode }> = ({ children })
       };
       
       try {
-        const isNewUser = !(await getDoc(profileRef)).exists();
-
         await setDoc(profileRef, {
           email: userEmail, // Ensure email is always set/updated from auth
           name: data.name || '',
           academicYear: data.academicYear,
           desiredIndustries: data.desiredIndustries,
           updatedAt: serverTimestamp(),
-          ...(isNewUser ? { createdAt: serverTimestamp() } : {}) // Add createdAt only if new
+          createdAt: serverTimestamp()
         }, { merge: true }); // Use merge to avoid overwriting createdAt on updates
 
         setProfileState(newProfileData);
-
-        // If it's a new user profile being created, initialize timeline steps
-        if (isNewUser) {
-          const timelineCollectionRef = collection(db, 'users', userId, 'timelineSteps');
-          const batch = writeBatch(db);
-          INITIAL_TIMELINE_STEPS.forEach(step => {
-            const stepRef = doc(timelineCollectionRef, step.id); // Use predefined ID for initial steps
-            batch.set(stepRef, {
-              title: step.title,
-              description: step.description,
-              status: step.status,
-              // dueDate will be handled by the component if set, store as null or convert to Timestamp if needed
-              dueDate: step.dueDate ? step.dueDate : null, // Store as JS Date or Firebase Timestamp
-            });
-          });
-          await batch.commit();
-        }
 
       } catch (error) {
         console.error("Error saving profile to Firestore:", error);

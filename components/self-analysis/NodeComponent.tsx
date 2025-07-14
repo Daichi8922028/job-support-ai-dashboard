@@ -13,7 +13,8 @@ interface NodeComponentProps {
     connectorSide: 'top' | 'bottom' | 'left' | 'right'
   ) => void;
   isSelected?: boolean;
-  onMouseUpOnNode: (event: React.MouseEvent<HTMLDivElement>, nodeId: string) => void; // Added prop
+  onMouseUpOnNode: (event: React.MouseEvent<HTMLDivElement>, nodeId: string) => void;
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>, nodeId: string) => void;
 }
 
 const NodeComponent: React.FC<NodeComponentProps> = ({
@@ -22,7 +23,8 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
   onDoubleClick,
   onConnectorMouseDown,
   isSelected,
-  onMouseUpOnNode, // Destructure the new prop
+  onMouseUpOnNode,
+  onDragStart,
 }) => {
   const paletteItem = PALETTE_ITEMS.find(p => p.id === node.paletteItemId);
   if (!paletteItem) return null;
@@ -45,11 +47,13 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
         top: node.y,
         width: `${NODE_WIDTH}px`,
         height: `${NODE_HEIGHT}px`,
-        touchAction: 'none', // For pointer events
+        touchAction: 'none',
       }}
+      draggable={!!onDragStart}
       onMouseDown={(e) => onMouseDown(e, node.id)}
-      onMouseUp={(e) => onMouseUpOnNode(e, node.id)} // Attached onMouseUp event
+      onMouseUp={(e) => onMouseUpOnNode(e, node.id)}
       onDoubleClick={() => onDoubleClick(node.id)}
+      onDragStart={onDragStart ? (e) => onDragStart(e, node.id) : undefined}
       role="button"
       tabIndex={0}
       aria-label={`Node ${node.label}`}

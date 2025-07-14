@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 開発用の緩いルール（本番環境では使用しないでください）
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

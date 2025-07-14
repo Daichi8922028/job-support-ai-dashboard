@@ -63,14 +63,38 @@ export {
   orderBy
 };
 
+// Export Timestamp type
+export type { Timestamp as FirebaseTimestamp } from 'firebase/firestore';
+
 // Basic check for placeholder or obviously incorrect format for Firebase API Key.
 // This is a heuristic and might not catch all invalid keys.
 if (typeof window !== 'undefined') { // Only show warnings in the browser environment
+    console.log('=== Firebase初期化デバッグ ===');
+    console.log('Firebase設定チェック:', {
+        hasApiKey: !!firebaseConfig.apiKey,
+        apiKeyFormat: firebaseConfig.apiKey ? firebaseConfig.apiKey.substring(0, 10) + '...' : 'none',
+        validApiKeyFormat: firebaseConfig.apiKey?.startsWith("AIza"),
+        projectId: firebaseConfig.projectId,
+        authDomain: firebaseConfig.authDomain,
+        storageBucket: firebaseConfig.storageBucket,
+    });
+    
     if (!firebaseConfig.apiKey || !firebaseConfig.apiKey.startsWith("AIza")) {
         console.warn(
-            "Firebase API key (VITE_FIREBASE_API_KEY) appears to be missing or invalid. " +
+            "❌ Firebase API key (VITE_FIREBASE_API_KEY) appears to be missing or invalid. " +
             "Please verify that you have set your actual Firebase API key in the .env.local file. " +
             "Firebase features may not work correctly."
         );
+    } else {
+        console.log('✅ Firebase API key format appears valid');
     }
+    
+    // Firestore接続テスト用の情報
+    console.log('Firestore接続準備完了:', {
+        app: !!app,
+        db: !!db,
+        auth: !!auth,
+    });
+    
+    console.log('=== Firebase初期化デバッグ終了 ===');
 }
