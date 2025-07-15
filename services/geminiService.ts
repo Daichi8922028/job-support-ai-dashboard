@@ -40,7 +40,23 @@ export const generateChatResponse = async (history: Content[], newMessage: strin
   try {
     // Initialize the client inside the function call with the provided key.
     const ai = new GoogleGenAI({ apiKey });
-    const contents = [...history, { role: 'user', parts: [{ text: newMessage }] }];
+
+    // Modify the history to include Markdown formatting instructions
+    const modifiedHistory = [...history]; // Create a shallow copy
+    if (modifiedHistory.length > 0 && modifiedHistory[0].role === 'user') {
+        const firstPart = modifiedHistory[0].parts[0];
+        // Ensure the first part is a text part before modifying
+        if (firstPart && 'text' in firstPart) {
+            const originalText = firstPart.text;
+            // Create a new object for the first history item to avoid mutating the original
+            modifiedHistory[0] = {
+                ...modifiedHistory[0],
+                parts: [{ text: `${originalText}\n\n重要: 回答は必ずMarkdown形式で、見出し、リスト、太字などを使用して構造化してください。` }]
+            };
+        }
+    }
+
+    const contents = [...modifiedHistory, { role: 'user', parts: [{ text: newMessage }] }];
     const response: GenerateContentResponse = await ai.models.generateContent({
         model: GEMINI_TEXT_MODEL,
         contents: contents,

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { ChatMessage as ChatMessageType, GroundingChunkWeb } from '../types';
 import { UserCircleIcon, SparklesIcon, LinkIcon } from '@heroicons/react/24/solid';
 
@@ -27,7 +28,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
               : 'bg-white text-gray-800 rounded-bl-none'
           }`}
         >
-          <p className={`text-sm whitespace-pre-wrap ${message.isError ? 'font-semibold' : ''}`}>{message.text}</p>
+          <div className={`prose prose-sm max-w-none ${isUser ? 'text-white' : 'text-gray-800'}`}>
+            <ReactMarkdown>{message.text}</ReactMarkdown>
+          </div>
           {message.metadata?.groundingChunks && message.metadata.groundingChunks.length > 0 && (
              <div className="mt-2 pt-2 border-t border-gray-300 dark:border-gray-600">
               <h4 className="text-xs font-semibold mb-1 ${isUser ? 'text-blue-100' : 'text-gray-600'}">参照元:</h4>
